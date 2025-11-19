@@ -1,4 +1,3 @@
--- iA Hub แบบเต็ม
 -- โหลด Rayfield
 local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/dom090663/Rayfield/main/source.lua"))()
 
@@ -6,14 +5,8 @@ local Window = Rayfield:CreateWindow({
     Name = "iA Hub (ภาษาไทย)",
     LoadingTitle = "กำลังโหลด iA Hub...",
     LoadingSubtitle = "ขอให้สนุก :)",
-    ConfigurationSaving = {
-       Enabled = true,
-       FolderName = nil,
-       FileName = "iAHubConfig"
-    },
-    Discord = {
-       Enabled = false
-    }
+    ConfigurationSaving = { Enabled = true, FolderName = nil, FileName = "iAHubConfig" },
+    Discord = { Enabled = false }
 })
 
 -- Services
@@ -34,7 +27,7 @@ local tweenMinDelay = 0.5
 local tweenMaxDelay = 10
 local noclipEnabled = false
 
--- ฟังก์ชัน Noclip
+-- Noclip
 RunService.Stepped:Connect(function()
     if noclipEnabled and character then
         for _, part in pairs(character:GetDescendants()) do
@@ -45,7 +38,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ฟังก์ชันทวีน
+-- Tween function
 local function tweenTo(position, delay)
     local tweenInfo = TweenInfo.new(delay or tweenMinDelay, Enum.EasingStyle.Linear)
     local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(position)})
@@ -53,7 +46,7 @@ local function tweenTo(position, delay)
     tween.Completed:Wait()
 end
 
--- ฟังก์ชันเก็บของ
+-- เก็บของ
 local function collectItem(item)
     local handle = item:FindFirstChild("Handle")
     if handle then
@@ -114,7 +107,7 @@ Rayfield:CreateButton({
                     task.wait(1)
                     continue
                 end
-                -- Sort ตามความใกล้ตัว
+                -- Sort ใกล้ตัวก่อน
                 table.sort(items, function(a,b)
                     return (a.Handle.Position - hrp.Position).Magnitude < (b.Handle.Position - hrp.Position).Magnitude
                 end)
@@ -128,6 +121,37 @@ Rayfield:CreateButton({
                 end
                 task.wait(1)
             end
+        end)
+    end
+})
+
+-- ปุ่ม Escape (รันซ้ำ 20 ครั้ง)
+Rayfield:CreateButton({
+    Name = "Escape (หลบหนี)",
+    Callback = function()
+        task.spawn(function()
+            for i = 1,20 do
+                local args = {"Escape"}
+                local success, err = pcall(function()
+                    ReplicatedStorage:WaitForChild("PlayerTurnInput"):InvokeServer(unpack(args))
+                end)
+                if not success then warn("Escape ล้มเหลว: "..tostring(err)) end
+                task.wait(0.05) -- หน่วงเวลาเล็กน้อยระหว่างการยิง Remote
+            end
+        end)
+    end
+})
+
+-- ปุ่ม Dodge (ถ้าต้องการ)
+Rayfield:CreateButton({
+    Name = "Dodge (ถ้าเล่นมินิเกม)",
+    Callback = function()
+        task.spawn(function()
+            local args = {true,true}
+            local success, err = pcall(function()
+                ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Information"):WaitForChild("RemoteFunction"):FireServer(unpack(args))
+            end)
+            if not success then warn("Dodge ล้มเหลว: "..tostring(err)) end
         end)
     end
 })
